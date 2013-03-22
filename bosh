@@ -1,0 +1,284 @@
+have bosh && \
+__hint()
+{
+	local cur
+	cur=`_get_cword`
+
+	COMPREPLY=($(compgen -W '$@' -- $cur))
+	return 0
+} && \
+__hint_with_help()
+{
+	__hint $@ --help
+	return 0
+} && \
+_bosh()
+{
+	local cur pre pre2 opts
+
+	cur=`_get_cword`
+	pre="${COMP_WORDS[COMP_CWORD-1]}"
+
+	if [ $COMP_CWORD -gt 1 ]; then
+		pre2="${COMP_WORDS[COMP_CWORD-2]}"
+	else
+		pre2=""
+	fi
+
+	opts="
+	add
+	alias
+	aliases
+	blobs
+	cancel
+	cleanup
+	cloudcheck
+	complete
+	create
+	delete
+	deploy
+	deployment
+	deployments
+	diff
+	download
+	edit
+	generate
+	get
+	help
+	init
+	login
+	logout
+	logs
+	properties
+	public
+	purge
+	recreate
+	releases
+	rename
+	reset
+	restart
+	scp
+	set
+	ssh
+	start
+	status
+	stemcells
+	stop
+	sync
+	target
+	targets
+	task
+	tasks
+	unset
+	upload
+	validate
+	verify
+	version
+	vms
+	-c
+	--config
+	-C
+	--cache-dir
+	--no-color
+	--color
+	-v
+	--verbose
+	-q
+	--quiet
+	-n
+	--non-interactive
+	-N
+	--no-track
+	-t
+	--target URL
+	-u
+	--user
+	-p
+	--password
+	-d
+	--deployment
+	"
+
+	# Hint first parameter
+	if [ $COMP_CWORD = 1 ]; then
+		COMPREPLY=($(compgen -W "$opts" -- $cur))
+		return 0
+	fi
+
+	# Hint second parameters based on the first
+	[ $COMP_CWORD = 2 ] && \
+	case "$pre" in
+		add)
+			__hint blob
+			;;
+		cancel)
+			__hint task
+			;;
+		cleanup)
+			__hint ssh
+			;;
+		cloudcheck)
+			# TODO get deployment_name?
+			__hint_with_help --auto --report
+			;;
+		create)
+			__hint release user
+			;;
+		delete)
+			__hint deployment release stemcell
+			;;
+		deploy)
+			__hint_with_help --recreate
+			;;
+		deployment)
+			_filedir
+			;;
+		diff)
+			_filedir
+			;;
+		download)
+			__hint manifest public
+			;;
+		edit)
+			__hint deployment
+			;;
+		generate)
+			__hint job package
+			;;
+		get)
+			__hint property
+			;;
+		help)
+			__hint -all
+			;;
+		init)
+			__hint release
+			;;
+		logs)
+			__hint_with_help --agent --job --only --all
+			;;
+		properties)
+			__hint_with_help --terse
+			;;
+		public)
+			__hint stemcells
+			;;
+		recreate)
+			__hint_with_help --force
+			;;
+		rename)
+			__hint job
+			;;
+		reset)
+			__hint release
+			;;
+		restart|start|stop)
+			__hint_with_help --force
+			;;
+		scp)
+			__hint_with_help --download --upload --public_key --gateway_host --gateway_user
+			;;
+		set)
+			__hint property
+			;;
+		ssh)
+			__hint_with_help --public_key --gateway_host --gateway_user --default_password
+			;;
+		sync)
+			__hint blobs
+			;;
+		task)
+			__hint_with_help --no-cache --event --cpi --debug --result --raw --no-filter
+			;;
+		tasks)
+			__hint_with_help --no-filter
+			;;
+		unset)
+			__hint property
+			;;
+		upload)
+			__hint blobs release stemcell
+			;;
+		validate)
+			__hint jobs
+			;;
+		verify)
+			__hint release stemcell
+			;;
+		vms)
+			__hint_with_help --full
+			;;
+	esac && return 0
+
+	case "${COMP_WORDS[1]} ${COMP_WORDS[2]} ${COMP_WORDS[3]}" in
+		"add blob"?*)
+			_filedir
+			;;
+		"cloudcheck"?*)
+			__hint_with_help --auto --report
+			;;
+		"create release"?*)
+			__hint_with_help "--force --final --with-tarball --dry-run"
+			;;
+		"create user"?*)
+			__hint_with_help
+			;;
+		"delete deployment"?*)
+			__hint_with_help --force
+			;;
+		"delete release"?*)
+			__hint_with_help --force
+			;;
+		"delete stemcell"?*)
+			__hint_with_help
+			;;
+		"init release"?*)
+			__hint_with_help --git
+			;;
+		"public stemcells"?*)
+			__hint_with_help --full --tags --all
+			;;
+		"rename job"?*)
+			__hint_with_help --force
+			;;
+		"scp"?*)
+			__hint_with_help --download --upload --public_key --gateway_host --gateway_user
+			;;
+		"ssh"?*)
+			__hint_with_help --public_key --gateway_host --gateway_user --default_password
+			;;
+		"task"?*)
+			__hint_with_help --no-cache --event --cpi --debug --result --raw --no-filter
+			;;
+		"delete release"?*)
+			__hint_with_help --force
+			;;
+		"tasks recent"?*)
+			__hint_with_help --no-filter
+			;;
+		"upload release"?*)
+			__hint_with_help --rebase
+			;;
+		"upload stemcell"?*)
+			_filedir
+			;;
+		"verify release"?*)
+			_filedir
+			;;
+		"verify stemcell"?*)
+			_filedir
+			;;
+		"delete release"?*)
+			__hint_with_help --force
+			;;
+		"delete release"?*)
+			__hint_with_help --force
+			;;
+		"delete release"?*)
+			__hint_with_help --force
+			;;
+	esac
+
+
+} && \
+complete -F _bosh $filenames bosh
