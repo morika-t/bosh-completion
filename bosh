@@ -10,7 +10,7 @@ __hint()
 	local cur
 	cur=`_get_cword`
 
-	COMPREPLY=($(compgen -W '$@' -- $cur))
+	COMPREPLY+=($(compgen -W '$@' -- $cur))
 	return 0
 } && \
 __hint_with_help()
@@ -257,6 +257,7 @@ _bosh()
 			__hint_with_help --no-filter
 			;;
 		"upload release"?*)
+			_filedir
 			__hint_with_help --rebase
 			;;
 		"upload stemcell"?*)
