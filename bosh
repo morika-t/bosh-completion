@@ -1,3 +1,9 @@
+# auto completion support BOSH CLI
+#
+# For those who is curious about bosh, take a look at
+# http://github.com/cloudfoundry/bosh
+#
+
 have bosh && \
 __hint()
 {
